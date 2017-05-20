@@ -3,17 +3,25 @@ import java.util.Random;
 
 public class Deck {
     private ArrayList<Card> cards;
+    private int fullDeckScore;
+    private int fullDeckSize;
     final private Random random = new Random();
 
     public Deck()
     {
         cards = new ArrayList<>();
 
+        fullDeckScore = 0;
+        fullDeckSize = 0;
+
         for(Card.Suit suit : Card.Suit.values())
         {
             for(Card.Rank rank : Card.Rank.values())
             {
-                cards.add(new Card(suit, rank));
+                Card card = new Card(suit, rank);
+                cards.add(card);
+                fullDeckScore += card.GetScore();
+                fullDeckSize++;
             }
         }
     }
@@ -58,5 +66,15 @@ public class Deck {
     {
         cards.addAll(hand.cards);
         hand.Reset();
+    }
+
+    public int GetFullDeckScore()
+    {
+        return fullDeckScore;
+    }
+
+    public int GetFullDeckSize()
+    {
+        return fullDeckSize;
     }
 }

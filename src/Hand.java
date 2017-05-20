@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class Hand {
+    private int score;
     public ArrayList<Card> cards;
-    public int score;
 
     public Hand()
     {

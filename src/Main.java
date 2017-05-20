@@ -1,5 +1,5 @@
 public class Main {
-
+/*
     public static void main(String[] args) {
         Deck deck = new Deck();
         deck.PrintDeck();
@@ -8,4 +8,5 @@ public class Main {
         deck.Shuffle();
         deck.PrintDeck();
     }
+*/
 }
