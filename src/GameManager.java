@@ -35,6 +35,10 @@ public class GameManager {
 
     }
 
+    public void IncrementBet()
+    {
+        IncrementBet(5);
+    }
     public void IncrementBet(int x)
     {
         if (betFreezed)

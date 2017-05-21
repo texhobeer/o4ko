@@ -1,7 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
-public class GameInterface extends Container{
+public class GameInterface extends Container implements ActionListener {
     private App app;
     private Panel betPanel;
     private Label playerMoneyText;
@@ -154,5 +155,11 @@ public class GameInterface extends Container{
                                 .addComponent(playerScoreText)
                                 .addComponent(playerScoreVal))
         );
+    }
+
+    public void actionPerformed(ActionEvent e)
+    {
+        if (e.getSource() == betDecr)
+            app.getGameManager().DecrementBet(5);
     }
 }

@@ -1,3 +1,4 @@
+import javax.lang.model.util.ElementScanner6;
 import javax.swing.*;
 import java.applet.Applet;
 import java.awt.*;
@@ -25,9 +26,7 @@ public class App extends Applet implements Runnable {
         gameManager = new GameManager();
         gameInterface = new GameInterface(this, graphics);
         add(gameInterface);
-        setVisible(false);
-
-        CardImage kek = new CardImage();
+        gameInterface.setVisible(false);
 
         thread = new Thread(this);
         thread.start();
@@ -35,11 +34,11 @@ public class App extends Applet implements Runnable {
 
     public void paint(Graphics g)
     {
-//        graphics.setColor(new Color(79, 121, 66));
-//        graphics.fillRect(0, 0, width, height);
+        graphics.setColor(new Color(79, 121, 66));
+        graphics.fillRect(0, 0, width, height);
 
-//        g.drawImage(img, 0, 0, null);
-//        g.drawImage(CardImage.SpadesAce, 100, 100, null);
+        g.drawImage(img, 0, 0, null);
+        g.drawImage(CardImage.SpadesAce, 100, 100, null);
     }
 
     public void update(Graphics g)
@@ -68,5 +67,10 @@ public class App extends Applet implements Runnable {
         menu.setVisible(false);
         gameInterface.setVisible(true);
         gameManager.Init();
+    }
+
+    public GameManager getGameManager()
+    {
+        return gameManager;
     }
 }
