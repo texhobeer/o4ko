@@ -2,13 +2,17 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CardImage extends Container{
-    private int dx = 1;
-    private int dy = 1;
+    private float dx = 1;
+    private float dy = 1;
     public Image img;
     private int xPos;
     private int yPos;
+    private float aprXPos;
+    private float aprYPos;
     private int xDest;
     private int yDest;
+    private int clocks = 10;
+    private boolean isMoving;
 
     public CardImage(Card card)
     {
@@ -166,15 +170,18 @@ public class CardImage extends Container{
         }
     }
 
-    public void Draw(Graphics g)
-    {
-//        g.drawImage(img, xPos, yPos, null);
-    }
-
     public void SetDestPosition(int x, int y)
     {
         xDest = x;
         yDest = y;
+
+        dx = ((float) xDest - (float) yPos) / clocks;
+        dy = ((float) yDest - (float) yPos) / clocks;
+
+        aprXPos = xPos;
+        aprYPos = yPos;
+
+        isMoving = true;
     }
 
     public void SetPosition(int x, int y)
@@ -183,8 +190,38 @@ public class CardImage extends Container{
         yPos = y;
     }
 
+    public void Update() {
+        if (!isMoving)
+            return;
+
+        aprXPos += dx;
+        aprYPos += dy;
+
+        xPos = Math.round(aprXPos);
+        yPos = Math.round(aprYPos);
+
+        boolean xReached = false;
+        boolean yReached = false;
+
+        if (dx >= 0 && xPos >= xDest
+                || dx < 0 && xPos <= xDest) {
+            xPos = xDest;
+            xReached = true;
+        }
+
+        if (dy >= 0 && yPos >= yDest
+                || dy < 0 && yPos <= yDest) {
+            yPos = yDest;
+            yReached = true;
+        }
+
+        isMoving = !(xReached && yReached);
+    }
+
     public void Paint(Graphics g)
     {
+        Update();
+
         if (g != null)
             g.drawImage(img, xPos, yPos, null);
     }
@@ -207,6 +244,11 @@ public class CardImage extends Container{
     public int GetYPosition()
     {
         return yPos;
+    }
+
+    public boolean isMoving()
+    {
+        return isMoving;
     }
 
     public static final String path = "C:/Users/TEXHOBEER/Desktop/o4ko/pics/";

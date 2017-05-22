@@ -47,7 +47,7 @@ public class App extends Applet implements Runnable {
     public void repaint(Graphics g)
     {
         if (gameInterface.isVisible())
-            gameInterface.Paint(graphics);
+            gameInterface.Paint();
 
         g.drawImage(img, 0, 0, null);
     }
@@ -62,11 +62,10 @@ public class App extends Applet implements Runnable {
     {
         for(;;)
         {
-            repaint(graphics);
             try
             {
                 thread.sleep(20);
-
+                repaint(graphics);
                 Update();
             } catch (InterruptedException e)
             {

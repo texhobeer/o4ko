@@ -36,12 +36,16 @@ public class GameInterface extends Container implements ActionListener {
     private Panel infoPanel;
     private Label infoText;
 
+    private boolean isStalled;
+
     public GameInterface(App p, GameManager gMan , Graphics g)
     {
         app = p;
         gameManager = gMan;
         setSize(app.getWidth(), app.getHeight());
         isGameRunning = false;
+
+        isStalled = false;
 
         int panelWidth = getWidth() / 6;
         int panelHeight = getHeight() / 3;
@@ -178,7 +182,7 @@ public class GameInterface extends Container implements ActionListener {
         );
 
         playerPanel = new Panel();
-        playerPanel.setBackground( new Color(79, 121, 66));
+        playerPanel.setBackground(new Color(79, 121, 66));
         add(playerPanel);
         playerPanel.setLocation(betPanelPos, 2 * panelHeight);
         playerPanel.setSize(panelWidth, panelHeight);
@@ -220,6 +224,11 @@ public class GameInterface extends Container implements ActionListener {
 
     public void Update()
     {
+        if (bankHandUI.isMoving() || playerHandUI.isMoving())
+            isStalled = true;
+        else
+            isStalled = false;
+
         bet.setText(Integer.toString(gameManager.GetBet()));
         playerMoneyValue.setText(Integer.toString(gameManager.GetPlayerMoney()));
         bankMoneyVal.setText(Integer.toString(gameManager.GetBankMoney()));
@@ -244,12 +253,16 @@ public class GameInterface extends Container implements ActionListener {
             bankStatus.setText("");
         }
 
-        bankHandUI.Update();
         playerHandUI.Update();
+        if (!playerHandUI.isMoving())
+            bankHandUI.Update();
     }
 
     public void actionPerformed(ActionEvent e)
     {
+        if (isStalled)
+            return;
+
         if (e.getSource() == betDecr)
             gameManager.DecrementBet();
 
@@ -345,15 +358,35 @@ public class GameInterface extends Container implements ActionListener {
         }
     }
 
-    public void Paint(Graphics g)
+    public void Paint()
     {
-        bankHandUI.Paint();
         playerHandUI.Paint();
+        bankHandUI.Paint();
 
         int cardBackX = deckPanel.getX() + deckPanel.getWidth() / 2 - cardBack.getWidth(null) / 2;
         int cardBackY = deckPanel.getY() + deckPanel.getHeight() / 10;
 
-        deckPanel.getGraphics().drawImage(cardBack, cardBackX, cardBackY, null);
-        deckPanel.validate();
+        Image buff = deckPanel.createImage(deckPanel.getWidth(), deckPanel.getHeight());
+
+        if (buff == null)
+            return;
+
+        Graphics buffG = buff.getGraphics();
+
+        buffG.drawImage(cardBack, cardBackX + 2, cardBackY + 2, null);
+        buffG.drawImage(cardBack, cardBackX + 1, cardBackY + 1, null);
+        buffG.drawImage(cardBack, cardBackX, cardBackY, null);
+
+        deckPanel.getGraphics().drawImage(buff, deckPanel.getX(), deckPanel.getY(), null);
+    }
+
+    public int GetDeckXPos()
+    {
+        return deckPanel.getX() + deckPanel.getWidth() / 2 - cardBack.getWidth(null) / 2;
+    }
+
+    public int GetDeckYPos()
+    {
+        return deckPanel.getY() + deckPanel.getHeight() / 10;
     }
 }
