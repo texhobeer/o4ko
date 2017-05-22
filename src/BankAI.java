@@ -15,9 +15,7 @@ public class BankAI {
     }
 
     public boolean GetDecision() {
-        if (21 - CalcTurnMathEx() < sensitivity)
-            return false;
-        return true;
+        return (21 - CalcTurnMathEx() - bankHand.GetScore() > sensitivity);
     }
 
     public void SetSensitivity(float s)
@@ -31,10 +29,21 @@ public class BankAI {
         int deckSize = fullDeckSize;
         float deckScore = fullDeckScore;
 
-        for (int i = 0; i < playerHand.cards.size(); i++)
+        for (int i = 0; i < bankHand.cards.size(); i++)
         {
             deckScore -= bankHand.cards.get(i).GetScore();
             deckSize--;
+
+
+            if (playerHand.cards.size() > i)
+            {
+                deckScore -= deckScore / deckSize;
+                deckSize--;
+            }
+        }
+
+        if (playerHand.cards.size() > bankHand.cards.size())
+        {
             deckScore -= deckScore / deckSize;
             deckSize--;
         }

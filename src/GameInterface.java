@@ -4,6 +4,7 @@ import java.awt.event.*;
 
 public class GameInterface extends Container implements ActionListener {
     private App app;
+    private GameManager gameManager;
     private Panel betPanel;
     private Label playerMoneyText;
     private Label playerMoneyValue;
@@ -12,6 +13,7 @@ public class GameInterface extends Container implements ActionListener {
     private Button betIncr;
     private Label bet;
     private Button startGame;
+    private boolean isGameRunning;
 
     private Panel bankPanel;
     private Label bankStatus;
@@ -26,17 +28,68 @@ public class GameInterface extends Container implements ActionListener {
     private Label playerScoreText;
     private Label playerScoreVal;
 
-    public GameInterface(App p, Graphics g)
+    private HandInterface playerHandUI;
+    private HandInterface bankHandUI;
+
+    private Panel deckPanel;
+    private Panel infoPanel;
+    private Label infoText;
+
+    public GameInterface(App p, GameManager gMan , Graphics g)
     {
         app = p;
+        gameManager = gMan;
         setSize(app.getWidth(), app.getHeight());
+        isGameRunning = false;
 
         int panelWidth = getWidth() / 6;
         int panelHeight = getHeight() / 3;
         int betPanelPos = getWidth() - panelWidth;
 
+        bankHandUI = new HandInterface(0, panelHeight, getWidth() - panelWidth, panelHeight, gameManager.GetBankHand(), this);
+        playerHandUI = new HandInterface(0,2 * panelHeight, getWidth() - panelWidth, panelHeight, gameManager.GetPlayerHand(), this);
+
+        deckPanel = new Panel();
+        deckPanel.setBackground(new Color(79, 121, 66));
+        add(deckPanel);
+        deckPanel.setLocation(0, 0);
+        deckPanel.setSize(panelWidth, panelHeight);
+
+
+
+        infoPanel = new Panel();
+        infoPanel.setBackground(new Color(79, 121, 66));
+        add(infoPanel);
+        infoPanel.setLocation(panelWidth, 0);
+        infoPanel.setSize(getWidth() - 2 * panelWidth, panelHeight);
+
+        infoText = new Label("", Label.CENTER);
+        infoPanel.add(infoText);
+
+        GroupLayout infoLayout = new GroupLayout(infoPanel);
+        infoPanel.setLayout(infoLayout);
+        infoLayout.setAutoCreateGaps(true);
+        infoLayout.setAutoCreateContainerGaps(true);
+
+        Label lab1 = new Label("");
+        Label lab2 = new Label("");
+
+        infoLayout.setHorizontalGroup(
+                infoLayout.createParallelGroup()
+                        .addComponent(lab1)
+                        .addComponent(infoText)
+                        .addComponent(lab2)
+        );
+
+        infoLayout.setVerticalGroup(
+                infoLayout.createSequentialGroup()
+                    .addComponent(lab1)
+                    .addComponent(infoText)
+                    .addComponent(lab2)
+        );
+
         betPanel = new Panel();
-        betPanel.setBackground( new Color(79, 121, 66));
+        betPanel.setBackground(new Color(79, 121, 66));
         add(betPanel);
         betPanel.setLocation(betPanelPos, 0);
         betPanel.setSize(panelWidth, panelHeight);
@@ -50,9 +103,12 @@ public class GameInterface extends Container implements ActionListener {
         playerMoneyValue = new Label("0", Label.RIGHT);
         betText = new Label("Bet:", Label.LEFT);
         betDecr = new Button("-");
+        betDecr.addActionListener(this);
         bet = new Label("0", Label.CENTER);
         betIncr = new Button("+");
+        betIncr.addActionListener(this);
         startGame = new Button("Start game");
+        startGame.addActionListener(this);
 
         betLayout.setHorizontalGroup(
                 betLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -132,8 +188,10 @@ public class GameInterface extends Container implements ActionListener {
         playerLayout.setAutoCreateContainerGaps(true);
 
         getCardButton = new Button("Get card");
+        getCardButton.addActionListener(this);
         getCardButton.setEnabled(false);
         foldButton = new Button("Fold");
+        foldButton.addActionListener(this);
         foldButton.setEnabled(false);
         playerScoreText = new Label("", Label.LEFT);
         playerScoreVal = new Label("", Label.RIGHT);
@@ -155,11 +213,132 @@ public class GameInterface extends Container implements ActionListener {
                                 .addComponent(playerScoreText)
                                 .addComponent(playerScoreVal))
         );
+
+
+    }
+
+    public void Update()
+    {
+        bet.setText(Integer.toString(gameManager.GetBet()));
+        playerMoneyValue.setText(Integer.toString(gameManager.GetPlayerMoney()));
+        bankMoneyVal.setText(Integer.toString(gameManager.GetBankMoney()));
+
+        if (isGameRunning)
+        {
+            bankScoreVal.setText(Integer.toString(gameManager.GetBankScore()));
+            playerScoreVal.setText(Integer.toString(gameManager.GetPlayerScore()));
+        }
+        else
+        {
+            bankScoreVal.setText("");
+            playerScoreVal.setText("");
+        }
+
+        if (gameManager.IsBankFold() && isGameRunning)
+        {
+            bankStatus.setText("Fold");
+        }
+        else
+        {
+            bankStatus.setText("");
+        }
+
+        bankHandUI.Update();
+        playerHandUI.Update();
     }
 
     public void actionPerformed(ActionEvent e)
     {
         if (e.getSource() == betDecr)
-            app.getGameManager().DecrementBet(5);
+            gameManager.DecrementBet();
+
+        if (e.getSource() == betIncr)
+            gameManager.IncrementBet();
+
+        if (e.getSource() == startGame)
+            StartGame();
+
+        if (e.getSource() == foldButton)
+            Fold();
+
+        if (e.getSource() == getCardButton)
+            Turn();
+    }
+
+    private void StartGame()
+    {
+        getCardButton.setEnabled(true);
+        foldButton.setEnabled(true);
+        startGame.setEnabled(false);
+
+        bankHandUI.Clear();
+        playerHandUI.Clear();
+
+        playerScoreText.setText("Score:");
+        bankScoreText.setText("Bank score:");
+        getCardButton.setLabel("Get card");
+        infoText.setText("Round started!");
+
+        isGameRunning = true;
+
+        gameManager.StartGame();
+        Turn();
+    }
+
+    private void Turn()
+    {
+        gameManager.Turn();
+
+        if (gameManager.GetEndCase() != GameManager.EndCase.Null)
+            FinishGame();
+
+        if (gameManager.GetPlayerScore() > 21)
+            getCardButton.setLabel("Cheat!");
+    }
+
+    private void Fold()
+    {
+        gameManager.Fold();
+        FinishGame();
+    }
+
+    private void FinishGame()
+    {
+        getCardButton.setEnabled(false);
+        foldButton.setEnabled(false);
+        startGame.setEnabled(true);
+
+        playerScoreText.setText("");
+        bankScoreText.setText("");
+
+        isGameRunning = false;
+
+        switch(gameManager.GetEndCase())
+        {
+            case BankGainedO4KO:
+                infoText.setText("Bank gained O4KO! You lose!");
+                break;
+            case BankOverPlayer:
+                infoText.setText("Bank gained more score! You lose!");
+                break;
+            case BankOverScored:
+                infoText.setText("Bank gained more then O4KO! You win!");
+                break;
+            case Draw:
+                infoText.setText("Draw!");
+                break;
+            case PlayerGainedO4KO:
+                infoText.setText("You gained O4KO! You win!");
+                break;
+            case PlayerOverBank:
+                infoText.setText("You gained more score! You win!");
+                break;
+            case PlayerOverScored:
+                infoText.setText("You gained more then O4KO! You lose!");
+                break;
+            default:
+                infoText.setText("");
+                break;
+        }
     }
 }

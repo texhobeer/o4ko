@@ -1,5 +1,7 @@
+import java.util.ArrayList;
+
 public class GameManager {
-    private enum EndCase
+    public enum EndCase
     {
         BankGainedO4KO,
         PlayerGainedO4KO,
@@ -7,7 +9,8 @@ public class GameManager {
         PlayerOverScored,
         PlayerOverBank,
         BankOverPlayer,
-        Draw
+        Draw,
+        Null
     }
 
     private Deck deck;
@@ -20,6 +23,9 @@ public class GameManager {
     private Hand bankHand;
     private boolean betFreezed;
     private BankAI bankAI;
+    private boolean isPlayerFold;
+    private boolean isBankFold;
+    private EndCase endCase;
 
     public GameManager()
     {
@@ -54,6 +60,10 @@ public class GameManager {
         }
     }
 
+    public void DecrementBet()
+    {
+        DecrementBet(5);
+    }
     public void DecrementBet(int x)
     {
         if (betFreezed)
@@ -74,7 +84,15 @@ public class GameManager {
         deck.PutHandToDeck(playerHand);
         deck.PutHandToDeck(bankHand);
         deck.Shuffle();
+
+        playerScore = bankScore = 0;
+
+        isBankFold = false;
+        isPlayerFold = false;
+
         betFreezed = true;
+
+        endCase = EndCase.Null;
     }
 
     public void BankTurn()
@@ -83,18 +101,64 @@ public class GameManager {
 
         if (decision)
         {
-            bankHand.AddCard(deck.GetCard());
+            Card toBank = deck.GetCard();
+
+            bankHand.AddCard(toBank);
             bankScore = bankHand.GetScore();
 
             if (bankScore >= 21)
                 FinishGame();
+
+            return;
         }
+
+        isBankFold = true;
     }
 
     public void PlayerTurn()
     {
-        playerHand.AddCard(deck.GetCard());
+        Card toPlayer = deck.GetCard();
+
+        playerHand.AddCard(toPlayer);
         playerScore = playerHand.GetScore();
+
+        if (playerScore == 21)
+            FinishGame();
+    }
+
+    public void Turn()
+    {
+        if (!isPlayerFold)
+            PlayerTurn();
+
+        if (deck.GetSize() == 0)
+        {
+            FinishGame();
+            return;
+        }
+
+        if (endCase != EndCase.Null)
+            return;
+
+        if (!isBankFold)
+            BankTurn();
+
+        if (deck.GetSize() == 0)
+        {
+            FinishGame();
+        }
+    }
+
+    public void Fold()
+    {
+        isPlayerFold = true;
+
+        while (!isBankFold)
+        {
+            BankTurn();
+        }
+
+        FinishGame();
     }
 
     public void FinishGame()
@@ -118,31 +182,80 @@ public class GameManager {
         betFreezed = false;
     }
 
-    public void DrawActions(EndCase endCase)
+    private void DrawActions(EndCase e)
     {
-
+        endCase = e;
     }
 
-    public void WinActions(EndCase endCase)
+    private void WinActions(EndCase e)
     {
+        endCase = e;
+
         bankMoney -= bet;
         playerMoney += bet;
     }
 
-    public void LoseActions(EndCase endCase)
+    private void LoseActions(EndCase e)
     {
-        if (endCase != EndCase.PlayerOverScored && playerScore > 21)
+        endCase = e;
+
+        if (playerHand.lastCard != null && playerScore - playerHand.lastCard.GetScore() > 21)
             bet *= 2;
 
-        bankMoney += bet;
-        playerMoney -= bet;
-
-        if (playerMoney <= 0)
-            GameOver();
+        if (playerMoney - bet < 0)
+        {
+            bankMoney += playerMoney;
+            playerMoney = 0;
+        }
+        else
+        {
+            bankMoney += bet;
+            playerMoney -= bet;
+        }
     }
 
-    public void GameOver()
+    public int GetBet()
     {
+        return bet;
+    }
 
+    public int GetPlayerScore()
+    {
+        return playerScore;
+    }
+
+    public int GetBankScore()
+    {
+        return bankScore;
+    }
+
+    public int GetPlayerMoney()
+    {
+        return playerMoney;
+    }
+
+    public int GetBankMoney()
+    {
+        return bankMoney;
+    }
+
+    public EndCase GetEndCase()
+    {
+        return endCase;
+    }
+
+    public boolean IsBankFold()
+    {
+        return isBankFold;
+    }
+
+    public Hand GetPlayerHand()
+    {
+        return playerHand;
+    }
+
+    public Hand GetBankHand()
+    {
+        return bankHand;
     }
 }

@@ -3,6 +3,7 @@ import java.util.ArrayList;
 public class Hand {
     private int score;
     public ArrayList<Card> cards;
+    public Card lastCard;
 
     public Hand()
     {
@@ -14,11 +15,13 @@ public class Hand {
     {
         score = 0;
         cards.clear();
+        lastCard = null;
     }
 
     public void AddCard(Card card)
     {
         cards.add(card);
+        lastCard = card;
         score += card.GetScore();
     }
 

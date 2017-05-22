@@ -1,16 +1,23 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class CardImage {
-    private int dx, dy;
-    private Image img;
+public class CardImage extends Container{
+    private int dx = 1;
+    private int dy = 1;
+    public Image img;
     private int xPos;
     private int yPos;
     private int xDest;
     private int yDest;
 
+    public CardImage(Card card)
+    {
+        this(card, 0, 0);
+    }
     public CardImage(Card card, int x, int y)
     {
+        setSize(1000, 600);
+
         xPos = x;
         yPos = y;
 
@@ -161,13 +168,25 @@ public class CardImage {
 
     public void Draw(Graphics g)
     {
-        g.drawImage(img, xPos, yPos, null);
+//        g.drawImage(img, xPos, yPos, null);
     }
 
     public void SetDestPosition(int x, int y)
     {
         xDest = x;
         yDest = y;
+    }
+
+    public void SetPosition(int x, int y)
+    {
+        xPos = x;
+        yPos = y;
+    }
+
+    public void Paint(Graphics g)
+    {
+        if (g != null)
+            g.drawImage(img, xPos, yPos, null);
     }
 
     public void SetXPosition(int x)
@@ -190,7 +209,7 @@ public class CardImage {
         return yPos;
     }
 
-    public static final String path = "C:/Users/Alexander/Desktop/o4ko/pics/";
+    public static final String path = "C:/Users/TEXHOBEER/Desktop/o4ko/pics/";
 
     public static Image SpadesAce = new ImageIcon(path + "SpadesAce.gif").getImage();
     public static Image SpadesSix = new ImageIcon(path + "SpadesSix.gif").getImage();
@@ -231,4 +250,6 @@ public class CardImage {
     public static Image ClubsJack = new ImageIcon(path + "ClubsJack.gif").getImage();
     public static Image ClubsQueen = new ImageIcon(path + "ClubsQueen.gif").getImage();
     public static Image ClubsKing = new ImageIcon(path + "ClubsKing.gif").getImage();
+
+    public static Image CardBack = new ImageIcon(path + "CardBack.gif").getImage();
 }
