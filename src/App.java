@@ -46,7 +46,10 @@ public class App extends Applet implements Runnable {
 
     public void repaint(Graphics g)
     {
-        paint(g);
+        if (gameInterface.isVisible())
+            gameInterface.Paint(graphics);
+
+        g.drawImage(img, 0, 0, null);
     }
 
     private void Update()

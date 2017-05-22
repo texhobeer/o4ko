@@ -32,6 +32,7 @@ public class GameInterface extends Container implements ActionListener {
     private HandInterface bankHandUI;
 
     private Panel deckPanel;
+    private Image cardBack;
     private Panel infoPanel;
     private Label infoText;
 
@@ -55,7 +56,7 @@ public class GameInterface extends Container implements ActionListener {
         deckPanel.setLocation(0, 0);
         deckPanel.setSize(panelWidth, panelHeight);
 
-
+        cardBack = CardImage.CardBack;
 
         infoPanel = new Panel();
         infoPanel.setBackground(new Color(79, 121, 66));
@@ -313,32 +314,46 @@ public class GameInterface extends Container implements ActionListener {
 
         isGameRunning = false;
 
+        String data = " Bank score: " + gameManager.GetBankScore() + " Your score: " + gameManager.GetPlayerScore();
+
         switch(gameManager.GetEndCase())
         {
             case BankGainedO4KO:
-                infoText.setText("Bank gained O4KO! You lose!");
+                infoText.setText("Bank gained O4KO! You lose!" + data);
                 break;
             case BankOverPlayer:
-                infoText.setText("Bank gained more score! You lose!");
+                infoText.setText("Bank gained more score! You lose!" + data);
                 break;
             case BankOverScored:
-                infoText.setText("Bank gained more then O4KO! You win!");
+                infoText.setText("Bank gained more then O4KO! You win!" + data);
                 break;
             case Draw:
-                infoText.setText("Draw!");
+                infoText.setText("Draw!" + data);
                 break;
             case PlayerGainedO4KO:
-                infoText.setText("You gained O4KO! You win!");
+                infoText.setText("You gained O4KO! You win!" + data);
                 break;
             case PlayerOverBank:
-                infoText.setText("You gained more score! You win!");
+                infoText.setText("You gained more score! You win!" + data);
                 break;
             case PlayerOverScored:
-                infoText.setText("You gained more then O4KO! You lose!");
+                infoText.setText("You gained more then O4KO! You lose!" + data);
                 break;
             default:
                 infoText.setText("");
                 break;
         }
+    }
+
+    public void Paint(Graphics g)
+    {
+        bankHandUI.Paint();
+        playerHandUI.Paint();
+
+        int cardBackX = deckPanel.getX() + deckPanel.getWidth() / 2 - cardBack.getWidth(null) / 2;
+        int cardBackY = deckPanel.getY() + deckPanel.getHeight() / 10;
+
+        deckPanel.getGraphics().drawImage(cardBack, cardBackX, cardBackY, null);
+        deckPanel.validate();
     }
 }
